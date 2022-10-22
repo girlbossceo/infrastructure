@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -o errexit -o nounset
+
+umask 077
+
+for i in 1 2 3 4; do
+        # use /dev/random instead of urandom in case urandom hasn't been seeded
+        # on modern kernels it is good enough for our purposes
+        dd ibs=1 obs=1 count='80' 2>/dev/null </dev/random >"/etc/nginx/session_ticket_keys/$i.key"
+done
