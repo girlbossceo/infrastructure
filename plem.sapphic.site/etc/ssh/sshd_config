@@ -15,7 +15,7 @@
 #ListenAddress 0.0.0.0
 #ListenAddress ::
 ListenAddress 198.251.82.75
-ListenAddress 2605:6400:40:fc15:44f6:a4fd:516e:a692
+ListenAddress [2605:6400:40:fc15:44f6:a4fd:516e:a692]
 
 #HostKey /etc/ssh/ssh_host_rsa_key
 #HostKey /etc/ssh/ssh_host_ecdsa_key
