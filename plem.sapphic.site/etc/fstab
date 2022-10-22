@@ -1,0 +1,19 @@
+# Static information about the filesystems.
+# See fstab(5) for details.
+
+# <file system> <dir> <type> <options> <dump> <pass>
+# /dev/vda2
+UUID=00000000-0000-0000-0000-000000000000       /               xfs             rw,relatime,attr2,inode64,logbufs=8,logbsize=32k,noquota        0 1
+
+# /dev/vda1
+UUID=0000-0000          /boot           vfat            rw,nosuid,nodev,noexec,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro  0 2
+
+# /dev/vda3
+UUID=00000000-0000-0000-0000-000000000000       /home           xfs             rw,relatime,nosuid,noexec,nodev,attr2,inode64,logbufs=8,logbsize=32k,noquota       0 2
+
+/tmp     /tmp       xfs    defaults,bind,nosuid,noexec,nodev     1 2
+/var     /var       xfs    defaults,bind,nosuid                  1 2
+
+proc /proc proc nosuid,nodev,noexec,hidepid=2,gid=proc 0 0
+
+/.swapfile none swap defaults 0 0

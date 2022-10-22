@@ -1,0 +1,9 @@
+[Unit]
+Description=Secure time sync 1 hour
+Requires=secure-time-sync.service
+
+[Timer]
+OnCalendar=hourly
+
+[Install]
+WantedBy=timers.target

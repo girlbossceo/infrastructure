@@ -1,0 +1,12 @@
+[Match]
+Name=ens3
+
+[Network]
+LinkLocalAddressing=ipv6
+Address=198.251.82.75/24
+Gateway=198.251.82.1
+Address=45.61.188.53/24
+Gateway=45.61.188.1
+Address=2605:6400:40:fc15:f983:1e5e:d848:b9c9/48
+Address=2605:6400:40:fc15:44f6:a4fd:516e:a692/48
+Gateway=2605:6400:40::1
