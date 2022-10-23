@@ -39,10 +39,10 @@ MACs -*
 
 # Authentication:
 
-LoginGraceTime 15s
+LoginGraceTime 10s
 PermitRootLogin no
 #StrictModes yes
-MaxAuthTries 3
+MaxAuthTries 2
 #MaxSessions 10
 
 PubkeyAuthentication yes
