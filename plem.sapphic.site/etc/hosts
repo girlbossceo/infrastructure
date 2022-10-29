@@ -1,0 +1,66 @@
+# Static table lookup for hostnames.
+# See hosts(5) for details.
+
+# doesn't do anything because unbound ignores hosts
+
+#<local-data>
+0.0.0.0 kiwifarms.ru
+0.0.0.0 kiwifarms.net
+0.0.0.0 kiwifarms.top
+0.0.0.0 kiwifarms.is
+0.0.0.0 kiwifarms.tw
+0.0.0.0 kiwifarms.hk
+0.0.0.0 kiwifarms.nl
+0.0.0.0 kiwifarms.st
+0.0.0.0 8kun.top
+0.0.0.0 gaysagainstgroomers.com
+0.0.0.0 stormer-daily.rw
+0.0.0.0 dailystormer.ru
+0.0.0.0 4chan.org
+0.0.0.0 7chan.org
+0.0.0.0 thedonald.win
+0.0.0.0 patriots.win
+0.0.0.0 cloudflare.com
+0.0.0.0 cloudflare.net
+0.0.0.0 cloudflare.cc
+0.0.0.0 cloudflare-dns.com
+0.0.0.0 one.one.one.one
+0.0.0.0 parler.com
+0.0.0.0 poa.st
+0.0.0.0 cutefunny.art
+0.0.0.0 plus.st
+0.0.0.0 ddos-guard.net
+0.0.0.0 fiberhub.com
+0.0.0.0 calyxos.org
+0.0.0.0 calyxinstitute.org
+0.0.0.0 fsf.org
+0.0.0.0 midov.pl
+0.0.0.0 calyx.dev
+0.0.0.0 aragon.sh
+0.0.0.0 anontier.nl
+0.0.0.0 zygoat.club
+0.0.0.0 waifuhunter.club
+0.0.0.0 techlore.net
+0.0.0.0 glowers.club
+0.0.0.0 thisisjoes.site
+0.0.0.0 matrix.thisisjoes.site
+0.0.0.0 netzbegruenung.de
+0.0.0.0 matrix.netzbegruenung.de
+0.0.0.0 cocknutsandball.com
+0.0.0.0 matrix.cocknutsandball.com
+0.0.0.0 matrix.kiwifarms.net
+0.0.0.0 gay.nigga.no
+0.0.0.0 nigga.no
+0.0.0.0 fucknigge.rs
+# impersonating real austinhuang.me by nazis
+0.0.0.0 austinhuang.lol
+0.0.0.0 agnos.is
+0.0.0.0 jaw.sh
+0.0.0.0 onionfarms.com
+0.0.0.0 cwcki.club
+0.0.0.0 lolcow.farm
+0.0.0.0 sneed.church
+0.0.0.0 polymc.org
+0.0.0.0 inferencium.net
+0.0.0.0 lucasvl.nl
+#</local-data>
