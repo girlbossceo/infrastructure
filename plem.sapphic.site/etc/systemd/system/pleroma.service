@@ -8,6 +8,7 @@ Restart=on-failure
 
 ; Name of the user that runs the Pleroma service.
 User=pleroma
+Group=pleroma
 
 ; Make sure that all paths fit your installation.
 ; Path to the home directory of the user running the Pleroma service.
@@ -40,7 +41,7 @@ PrivateUsers=true
 MemoryDenyWriteExecute=true
 LockPersonality=true
 ProtectClock=true
-UMask=0022
+UMask=0027
 
 SystemCallArchitectures=native
 
