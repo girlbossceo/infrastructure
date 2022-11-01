@@ -256,10 +256,13 @@ HardwareAccel 1
 
 HiddenServiceDir /var/lib/tor/hidden_services/
 HiddenServicePort 80 unix:/var/run/plem.sapphic.site.sock
+HTTPTunnelPort 8080
+HiddenServicePort 22 127.0.0.1:22
 
 NoExec 1
 Sandbox 1
 
+#SOCKSPort 9050 unix:/var/run/tor_socks.sock
 SOCKSPort 9050
 
 DisableDebuggerAttachment 1
