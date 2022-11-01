@@ -16,5 +16,6 @@ UUID=00000000-0000-0000-0000-000000000000       /home           xfs             
 
 proc /proc proc nosuid,nodev,noexec,hidepid=2,gid=proc 0 0
 
-#/home/.swapfile none swap defaults 0 0
 /dev/mapper/swap none swap defaults 0 0
+
+UUID=00000000-0000-0000-0000-000000000000       /mnt/pleroma_storage            xfs             rw,noexec,nodev,nosuid,relatime,attr2,inode64,logbufs=8,logbsize=32k,noquota    0 2

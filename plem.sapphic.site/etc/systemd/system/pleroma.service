@@ -21,6 +21,7 @@ ExecStop=/opt/pleroma/bin/pleroma stop
 
 PrivateTmp=true
 ProtectSystem=full
+ProtectHome=true
 PrivateDevices=true
 NoNewPrivileges=true
 ; Drops the sysadmin capability from the daemon.
@@ -42,7 +43,8 @@ MemoryDenyWriteExecute=true
 LockPersonality=true
 ProtectClock=true
 UMask=0027
-
+SystemCallFilter=@system-service
+SystemCallFilter=~@obsolete
 SystemCallArchitectures=native
 
 [Install]
