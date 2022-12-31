@@ -1,8 +1,0 @@
-[Unit]
-Description=session ticket keys automount
-
-[Automount]
-Where=/etc/nginx/session_ticket_keys
-
-[Install]
-WantedBy=multi-user.target

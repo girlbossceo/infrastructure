@@ -16,17 +16,14 @@
 #ListenAddress ::
 ListenAddress 198.251.82.75
 ListenAddress [2605:6400:40:fc15:44f6:a4fd:516e:a692]
+#ListenAddress 127.0.0.1
 
 #HostKey /etc/ssh/ssh_host_rsa_key
 #HostKey /etc/ssh/ssh_host_ecdsa_key
-
-# this forces only highly secure and authenticated ciphers
-# blocks majority of bots and forces modern SSH clients
-
 HostKey /etc/ssh/ssh_host_ed25519_key
 HostKeyAlgorithms ssh-ed25519
 KexAlgorithms sntrup761x25519-sha512@openssh.com,curve25519-sha256
-PubkeyAcceptedKeyTypes sk-ssh-ed25519@openssh.com
+PubkeyAcceptedKeyTypes ssh-ed25519,sk-ssh-ed25519@openssh.com
 Ciphers chacha20-poly1305@openssh.com
 MACs -*
 
@@ -35,19 +32,19 @@ MACs -*
 
 # Logging
 #SyslogFacility AUTH
-#LogLevel INFO
+LogLevel VERBOSE
 
 # Authentication:
 
-LoginGraceTime 10s
+LoginGraceTime 30s
 PermitRootLogin no
 #StrictModes yes
-MaxAuthTries 2
+MaxAuthTries 10
 #MaxSessions 10
 
 PubkeyAuthentication yes
 
-AllowUsers tpyrope
+AllowUsers tpyrope gitea
 
 # The default is to check both .ssh/authorized_keys and .ssh/authorized_keys2
 # but this is overridden so installations will only check .ssh/authorized_keys

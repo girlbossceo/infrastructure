@@ -1,0 +1,67 @@
+[Unit]
+Description=Akkoma social network
+After=network-online.target postgresql.service caddy.service varnish.service
+StartLimitInterval=0
+
+[Service]
+ExecReload=/bin/kill $MAINPID
+RestartSec=5
+Restart=always
+
+BindReadOnlyPaths=/usr/bin/mix:/mix
+BindPaths=/mnt/pleroma_storage/pleroma /opt/akkoma
+
+User=pleroma
+Group=pleroma
+
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl"
+Environment="MIX_ENV=prod"
+Environment="HOME=/opt/akkoma"
+Environment="ERL_EPMD_ADDRESS=127.0.0.1"
+
+RuntimeDirectory=akkoma
+#RootDirectory=/run/akkoma
+WorkingDirectory=/opt/akkoma
+#ExecStart=/opt/akkoma/bin/pleroma start
+ExecStart=/mix phx.server
+#ExecStop=/opt/akkoma/bin/pleroma stop
+
+MemoryHigh=1200M
+MemoryMax=1300M
+
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=true
+NoNewPrivileges=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+DevicePolicy=closed
+
+RestrictAddressFamilies=AF_INET6 AF_INET AF_UNIX
+
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+ProcSubset=pid
+ProtectControlGroups=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectProc=invisible
+PrivateIPC=true
+PrivateUsers=true
+MemoryDenyWriteExecute=true
+LockPersonality=true
+ProtectClock=true
+UMask=0077
+SystemCallFilter=@system-service
+SystemCallFilter=~@clock @debug @mount @module @resources @reboot @swap @cpu-emulation @privileged
+#SystemCallFilter=~@clock @obsolete @debug @mount @module
+SystemCallArchitectures=native
+
+ReadWriteDirectories=/mnt/pleroma_storage/pleroma /opt/akkoma
+
+[Install]
+WantedBy=multi-user.target

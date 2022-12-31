@@ -1,0 +1,371 @@
+# The Caddyfile is an easy way to configure your Caddy web server.
+#
+# https://caddyserver.com/docs/caddyfile
+#
+# The configuration below serves a welcome page over HTTP on port 80.
+# To use your own domain name (with automatic HTTPS), first make
+# sure your domain's A/AAAA DNS records are properly pointed to
+# this machine's public IP, then replace the line below with your
+# domain name.
+#
+# https://caddyserver.com/docs/caddyfile/concepts#addresses
+{
+        order listencaddy before file_server
+        # Restrict the admin interface to a local unix file socket whose directory
+        # is restricted to caddy:caddy. By default the TCP socket allows arbitrary
+        # modification for any process and user that has access to the local
+        # interface. If admin over TCP is turned on one should make sure
+        # implications are well understood.
+#        admin "unix//run/caddy/admin.socket"
+        admin off
+
+        email infrastructure@sapphic.site
+        key_type p384
+
+        servers {
+                protocols h1 h2 h3
+                strict_sni_host insecure_off
+        }
+
+}
+
+(listencaddy) {
+        listencaddy {
+                api_key "0000000000000000000000000000000000000000000000000"
+                banned_uris "\/wp-admin|\/.env|\/phpMyAdmin|\/api\/v1\/instance\/peers|\/config.php|\/admin.php|\/xmlrpc.php|\/wp-login|\/aws\/credentials|\/.htaccess|\/etc\/passwd|\/etc\/group|\/boot.ini|\/web.config|\/test.php|\/.aws\/|\/phpinfo|\/wp\/v2\/users\/|\/.DS_Store|\/telescope\/requests|\/com.atlassian.jira\/jira-webapp-dist\/pom.properties|\/info.php|\/login.action|\/microsoft.exchange.ediscovery.exporttool.application|\/v2\/_catalog|\/boaform\/admin|\/wp-22.php|\/actuator\/gateway|\/eval-stdin.php|\/perl.alfa|\/db.php|\/wp-plain.php|\/oebwiihf.php|\/solr\/admin\/info\/|\/bablosoft.com|\/best-proxies.ru|\/wp-json\/|\/..\/..\/|\/rootDesc.xml|\/auth\/logon.aspx|\/DeviceDescription.xml|\/wanipcn.xml|\/picdesc.xml|\/ctrlt\/DeviceUpgrade_1|\/hazelcast\/rest\/cluster|\/_cat\/indices|\/owa\/auth.owa"
+        }
+}
+
+# Import additional caddy config files in /etc/caddy/conf.d/
+#import /etc/caddy/conf.d/*
+
+git.girlboss.ceo {
+        import listencaddy
+
+        bind 198.251.82.75 [2605:6400:40:fc15:44f6:a4fd:516e:a692]
+        encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header -Server
+        header Set-Cookie SameSite=Lax SameSite=Strict
+
+        reverse_proxy unix//run/gitea/gitea.sock {
+                transport http {
+                        keepalive_idle_conns 256
+                        max_conns_per_host 4096
+                        compression gzip
+                }
+
+        max_fails 10
+        flush_interval -1
+
+        header_down X-DNS-Prefetch-Control off
+        header_down X-Robots-Tag "none"
+        header_up Set-Cookie SameSite=Lax SameSite=Strict
+        header_down Set-Cookie SameSite=Lax SameSite=Strict
+        header_down -Server
+        header_down X-XSS-Protection "0"
+        header_down Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header_down Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header_down X-Content-Type-Options "nosniff"
+        header_down Referrer-Policy "no-referrer"
+        #header_down Cross-Origin-Resource-Policy "same-origin"
+        #header_down Cross-Origin-Opener-Policy "same-origin"
+#        header_down Cross-Origin-Embedder-Policy "require-corp"
+#       header_down Content-Security-Policy "upgrade-insecure-requests;script-src 'self';connect-src 'self' blob: https://plem.sapphic.site wss://plem.sapphic.site ;media-src 'self' https:;img-src 'self' data: blob: https:;default-src 'none';base-uri 'none';frame-ancestors 'none';style-src 'self' 'unsafe-inline';font-src 'self';manifest-src 'self';"
+        header_down Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header_down Origin-Agent-Cluster "?1"
+        #header_down X-Frame-Options "DENY"
+        }
+}
+
+www.git.girlboss.ceo {
+        import listencaddy
+        bind 198.251.82.75 [2605:6400:40:fc15:44f6:a4fd:516e:a692]
+        encode gzip
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "noarchive, nositelinkssearchbox, nosnippet, notranslate"
+        redir / https://git.girlboss.ceo{uri} permanent
+}
+
+mta-sts.sapphic.site {
+        import listencaddy
+        bind 198.251.82.75 [2605:6400:40:fc15:44f6:a4fd:516e:a692]
+        encode gzip
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+
+        header /.well-known/mta-sts.txt Content-Type text/plain
+        root * /var/www/html/
+        file_server
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "none"
+        redir / https://blog.girlboss.ceo{uri} permanent
+}
+
+www.sapphic.site, sapphic.site {
+        import listencaddy
+        bind 198.251.82.75 [2605:6400:40:fc15:44f6:a4fd:516e:a692]
+        encode gzip
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "noarchive, nositelinkssearchbox, nosnippet, notranslate"
+        redir / https://blog.girlboss.ceo{uri} permanent
+}
+
+plem.sapphic.site {
+        import listencaddy
+        bind 198.251.82.75 [2605:6400:40:fc15:44f6:a4fd:516e:a692]
+        encode gzip
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header -Server
+        header Set-Cookie SameSite=Lax SameSite=Strict
+
+        respond /api/v1/instance/peers "girlboss.ceo" 451
+#       respond /nodeinfo/* "girlboss.ceo" 451
+
+        reverse_proxy unix//run/varnishd/akkoma.sock {
+#        reverse_proxy 127.0.0.1:4000 {
+                transport http {
+                        keepalive_idle_conns 256
+                        max_conns_per_host 4096
+                        compression gzip
+                }
+
+        max_fails 10
+        flush_interval -1
+        header_up Set-Cookie SameSite=Lax SameSite=Strict
+        header_down Set-Cookie SameSite=Lax SameSite=Strict
+        header_down X-DNS-Prefetch-Control off
+        header_down X-Robots-Tag "none"
+        header_down -Server
+        header_down X-XSS-Protection "0"
+        header_down Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header_down Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header_down X-Content-Type-Options "nosniff"
+        header_down Referrer-Policy "no-referrer"
+        header_down Cross-Origin-Resource-Policy "same-origin"
+        header_down Cross-Origin-Opener-Policy "same-origin"
+        header_down Cross-Origin-Embedder-Policy "require-corp"
+#       header_down Content-Security-Policy "upgrade-insecure-requests;script-src 'self';connect-src 'self' blob: https://plem.sapphic.site wss://plem.sapphic.site ;media-src 'self' https:;img-src 'self' data: blob: https:;default-src 'none';base-uri 'none';frame-ancestors 'none';style-src 'self' 'unsafe-inline';font-src 'self';manifest-src 'self';"
+        header_down Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header_down Origin-Agent-Cluster "?1"
+        header_down X-Frame-Options "DENY"
+#        header_down Content-Security-Policy "default-src 'none'; script-src 'self'; connect-src 'self' blob: https://plem.sapphic.site wss://plem.sapphic.site; media-src 'self' data: blob:; img-src 'self' data: blob: https: https://plem.sapphic.site; frame-src 'none'; frame-ancestors 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; manifest-src 'self'; base-uri 'none'; webrtc 'block'; block-all-mixed-content"
+        }
+}
+
+www.plem.sapphic.site {
+        import listencaddy
+        bind 198.251.82.75 [2605:6400:40:fc15:44f6:a4fd:516e:a692]
+        encode gzip
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "noarchive, nositelinkssearchbox, nosnippet, notranslate"
+        redir / https://plem.sapphic.site{uri} permanent
+}
+
+www.translate.terezi.dev {
+        import listencaddy
+        bind 198.251.82.75 [2605:6400:40:fc15:44f6:a4fd:516e:a692]
+        encode gzip
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "noarchive, nositelinkssearchbox, nosnippet, notranslate"
+        redir / https://translate.terezi.dev{uri} permanent
+}
+
+translate.terezi.dev {
+        import listencaddy
+
+        bind 198.251.82.75 [2605:6400:40:fc15:44f6:a4fd:516e:a692]
+        encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header -Server
+#       header Set-Cookie SameSite=Lax SameSite=Strict
+
+        reverse_proxy 127.0.0.1:12000 {
+                transport http {
+                        keepalive_idle_conns 256
+                        max_conns_per_host 4096
+                        compression gzip
+                }
+
+        max_fails 10
+        flush_interval -1
+
+        header_down X-DNS-Prefetch-Control off
+        header_down X-Robots-Tag "none"
+#       header_up Set-Cookie SameSite=Lax SameSite=Strict
+#       header_down Set-Cookie SameSite=Lax SameSite=Strict
+        header_down X-XSS-Protection "0"
+        header_down Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header_down Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header_down X-Content-Type-Options "nosniff"
+        header_down Referrer-Policy "no-referrer"
+        header_down Cross-Origin-Resource-Policy "same-origin"
+        header_down Cross-Origin-Opener-Policy "same-origin"
+        header_down Cross-Origin-Embedder-Policy "require-corp"
+#       header_down Content-Security-Policy "upgrade-insecure-requests;script-src 'self';connect-src 'self' blob: https://plem.sapphic.site wss://plem.sapphic.site ;media-src 'self' https:;img-src 'self' data: blob: https:;default-src 'none';base-uri 'none';frame-ancestors 'none';style-src 'self' 'unsafe-inline';font-src 'self';manifest-src 'self';"
+        header_down Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header_down Origin-Agent-Cluster "?1"
+        header_down X-Frame-Options "DENY"
+        }
+}

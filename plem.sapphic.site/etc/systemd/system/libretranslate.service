@@ -1,0 +1,54 @@
+[Unit]
+Description=Libretranslate translate.terezi.dev
+After=network.target
+StartLimitInterval=0
+
+[Service]
+Type=simple
+User=libretrans
+Group=libretrans
+
+Restart=always
+RestartSec=3
+
+RuntimeDirectory=libretranslate
+Environment="VIRTUAL_ENV=/mnt/pleroma_storage/libretranslate"
+WorkingDirectory=/mnt/pleroma_storage/libretranslate/
+#ExecStart=/mnt/pleroma_storage/libretranslate/bin/python3 /mnt/pleroma_storage/libretranslate/bin/libretranslate --host 127.0.0.1 --port 12000 --threads 1 --suggestions --char-limit 666666 --req-limit 100 --debug
+ExecStart=/mnt/pleroma_storage/libretranslate/bin/libretranslate --host 127.0.0.1 --port 12000 --ssl --char-limit 666666 --req-limit 125 --threads 1 --update-models
+
+BindPaths=/mnt/pleroma_storage/libretranslate/
+ReadWritePaths=/mnt/pleroma_storage/libretranslate/
+
+MemoryHigh=1700M
+MemoryMax=2500M
+
+DevicePolicy=closed
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=true
+NoNewPrivileges=true
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+ProcSubset=pid
+RestrictAddressFamilies=AF_INET6 AF_INET AF_UNIX
+ProtectControlGroups=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectProc=invisible
+PrivateIPC=true
+PrivateUsers=true
+#MemoryDenyWriteExecute=true
+LockPersonality=true
+ProtectClock=true
+UMask=0077
+SystemCallFilter=@system-service @resources
+SystemCallFilter=~@clock @debug @module @mount @reboot @swap @cpu-emulation @privileged @obsolete
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target

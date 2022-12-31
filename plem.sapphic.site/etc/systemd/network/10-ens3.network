@@ -2,6 +2,8 @@
 Name=ens3
 
 [Network]
+#DHCP=yes
+#IPv6AcceptRA=yes
 LinkLocalAddressing=ipv6
 Address=198.251.82.75/24
 Gateway=198.251.82.1
