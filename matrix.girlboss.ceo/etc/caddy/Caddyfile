@@ -1,0 +1,365 @@
+# The Caddyfile is an easy way to configure your Caddy web server.
+#
+# Unless the file starts with a global options block, the first
+# uncommented line is always the address of your site.
+#
+# To use your own domain name (with automatic HTTPS), first make
+# sure your domain's A/AAAA DNS records are properly pointed to
+# this machine's public IP, then replace ":80" below with your
+# domain name.
+
+
+{
+        # Restrict the admin interface to a local unix file socket whose directory
+        # is restricted to caddy:caddy. By default the TCP socket allows arbitrary
+        # modification for any process and user that has access to the local
+        # interface. If admin over TCP is turned on one should make sure
+        # implications are well understood.
+        admin off
+
+        order listencaddy before file_server
+
+        email infrastructure@girlboss.ceo
+        key_type p384
+
+        servers {
+                protocols h1 h2 h3
+                strict_sni_host insecure_off
+        }
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+}
+
+(listencaddy) {
+        listencaddy {
+                api_key "00000000000000000000000000000000000000000000000000000"
+                banned_uris "\/wp-admin|\/.env|\/phpMyAdmin|\/api\/v1\/instance\/peers|\/config.php|\/admin.php|\/xmlrpc.php|\/wp-login|\/aws\/credentials|\/nodeinfo\/|\/.htaccess|\/etc\/passwd|\/etc\/group|\/boot.ini|\/web.config|\/test.php|\/.aws\/|\/phpinfo|\/wp\/v2\/users\/|\/.DS_Store|\/telescope\/requests|\/com.atlassian.jira\/jira-webapp-dist\/pom.properties|\/info.php|\/login.action|\/microsoft.exchange.ediscovery.exporttool.application|\/v2\/_catalog|\/.git\/config|\/boaform\/admin|\/wp-22.php|\/actuator\/gateway|\/eval-stdin.php|\/perl.alfa|\/db.php|\/wp-plain.php|\/oebwiihf.php|\/solr\/admin\/info\/|\/bablosoft.com|\/best-proxies.ru|\/wp-json\/|\/..\/..\/|\/rootDesc.xml|\/auth\/logon.aspx|\/DeviceDescription.xml|\/wanipcn.xml|\/picdesc.xml|\/ctrlt\/DeviceUpgrade_1|\/hazelcast\/rest\/cluster|\/_cat\/indices|\/owa\/auth.owa"
+        }
+}
+
+matrix.girlboss.ceo {
+        import listencaddy
+        #encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header -Server
+
+        header / Content-Security-Policy "font-src 'none'; manifest-src 'none'; object-src 'none'; script-src 'none'; style-src 'none'; frame-ancestors 'none'; block-all-mixed-content"
+        header X-Robots-Tag "none"
+        header X-DNS-Prefetch-Control off
+
+        reverse_proxy /_matrix/* 127.0.0.1:6167 {
+                transport http {
+                        keepalive_idle_conns 256
+                        max_conns_per_host 4096
+                        max_response_header 75MiB
+                        keepalive 3m
+                        #compression gzip
+                        read_buffer 16KiB
+                        write_buffer 16KiB
+                }
+
+        max_buffer_size 16KiB
+        max_fails 10
+        flush_interval -1
+        header_down Content-Security-Policy "font-src 'none'; manifest-src 'none'; object-src 'none'; script-src 'none'; style-src 'none'; frame-ancestors 'self'; block-all-mixed-content"
+        header_down -Server
+        header_down Referrer-Policy "no-referrer"
+        header_down X-Frame-Options "SAMEORIGIN"
+        header_down X-XSS-Protection "0"
+        header_down Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header_down Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header_down X-Content-Type-Options "nosniff"
+        header_down Referrer-Policy "no-referrer"
+        header_down Cross-Origin-Resource-Policy "cross-origin"
+        header_down Cross-Origin-Opener-Policy "same-origin"
+        header_down Cross-Origin-Embedder-Policy "require-corp"
+        header_down Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header_down Origin-Agent-Cluster "?1"
+        }
+
+        redir / https://element.girlboss.ceo permanent
+}
+
+girlboss.ceo {
+        import listencaddy
+        encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console {
+                        time_format common_log
+                }
+        }
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header /.well-known/matrix/* Content-Type application/json
+        header /.well-known/matrix/* Cache-Control "public, max-age=172800"
+        header /.well-known/matrix/* Cross-Origin-Resource-Policy cross-origin
+        header /.well-known/matrix/* Access-Control-Allow-Origin *
+        respond /.well-known/matrix/server `{"m.server":"matrix.girlboss.ceo:443"}`
+        respond /.well-known/matrix/client `{"m.homeserver":{"base_url":"https://matrix.girlboss.ceo"}}`
+
+        handle_path /~tpyrope/* {
+                root * /mnt/volume_nyc3_01/tpyrope/
+                file_server browse
+        }
+
+        header X-DNS-Prefetch-Control off
+        header / Content-Security-Policy "font-src 'none'; manifest-src 'none'; object-src 'none'; script-src 'none'; style-src 'none'; frame-ancestors 'none'; block-all-mixed-content"
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Cross-Origin-Opener-Policy "same-origin"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "noarchive, nositelinkssearchbox, nosnippet, notranslate"
+
+        redir / https://blog.girlboss.ceo{uri} permanent
+}
+
+
+www.girlboss.ceo {
+        import listencaddy
+        encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "noarchive, nositelinkssearchbox, nosnippet, notranslate"
+        redir / https://girlboss.ceo{uri} permanent
+}
+
+www.terezi.dev, terezi.dev {
+        import listencaddy
+        encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header /abuseipdb-verification.html Content-Type text/plain
+        respond /abuseipdb-verification.html `abuseipdb-verification-o2GJXCV6`
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "noarchive, nositelinkssearchbox, nosnippet, notranslate"
+        redir / https://blog.girlboss.ceo{uri} permanent
+}
+
+www.blog.terezi.dev, blog.terezi.dev {
+        import listencaddy
+        encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "noarchive, nositelinkssearchbox, nosnippet, notranslate"
+        redir / https://blog.girlboss.ceo{uri} permanent
+}
+
+www.eridan.me, eridan.me {
+        import listencaddy
+        encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+        header /.well-known/traffic-advice Content-Type application/trafficadvice+json
+        respond /.well-known/traffic-advice `[]`
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "noarchive, nositelinkssearchbox, nosnippet, notranslate"
+        redir / https://blog.girlboss.ceo{uri} permanent
+}
+
+
+mta-sts.girlboss.ceo {
+        import listencaddy
+        encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+        header /.well-known/mta-sts.txt Content-Type text/plain
+        root * /var/www/html/
+        file_server
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "none"
+        redir / https://blog.girlboss.ceo{uri} permanent
+}
+
+mta-sts.terezi.dev {
+        import listencaddy
+        encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+        header /.well-known/mta-sts.txt Content-Type text/plain
+        root * /var/www/html/
+        file_server
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "none"
+        redir / https://blog.girlboss.ceo{uri} permanent
+}
+
+mta-sts.eridan.me {
+        import listencaddy
+        encode gzip
+        tls {
+                resolvers [::1] 8.8.8.8
+                curves secp384r1
+                ciphers TLS_CHACHA20_POLY1305_SHA256 TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        }
+
+        log {
+                output file /var/log/caddy/access.log
+                level info
+                format console
+        }
+        header /.well-known/mta-sts.txt Content-Type text/plain
+        root * /var/www/html/
+        file_server
+
+        header X-DNS-Prefetch-Control off
+        header -Server
+        header Document-Policy "document-domain=?0, document-write=?0, popups=?0, js-profiling=?0"
+        header X-XSS-Protection "0"
+        header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        header X-Content-Type-Options "nosniff"
+        header Referrer-Policy "no-referrer"
+        header Permissions-Policy "accelerometer=(), ambient-light-sensor=(), autoplay=(), battery=(), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(), display-capture=(), document-domain=(), encrypted-media=(), fullscreen=(), gamepad=(), geolocation=(), gyroscope=(), hid=(), idle-detection=(), interest-cohort=(), keyboard-map=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), sync-xhr=(), usb=(), xr-spatial-tracking=()"
+        header Origin-Agent-Cluster "?1"
+        header X-Frame-Options "DENY"
+        header X-Robots-Tag "none"
+        redir / https://blog.girlboss.ceo{uri} permanent
+}
